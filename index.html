@@ -2,179 +2,115 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Music By Kyy</title>
+  <title>ZFavorit Kyy</title>
   <style>
     body {
       margin: 0;
       padding: 20px;
-      font-family: Arial, sans-serif;
-      background-image: url('https://files.catbox.moe/d0374v.jpeg');
-      background-size: cover;
-      background-position: center;
+      background-color: #111;
       color: white;
-      transition: background-image 0.5s ease;
-    }
-
-    .container {
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-    }
-
-    h1 {
+      font-family: Arial, sans-serif;
       text-align: center;
-      margin-bottom: 15px;
     }
-
     #searchBox {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
-
-    #searchInput {
-      flex: 1;
+    input[type="text"] {
       padding: 8px;
+      width: 60%;
       border-radius: 5px;
       border: none;
-      font-size: 14px;
     }
-
-    #searchBtn {
+    button {
       padding: 8px 12px;
-      font-size: 14px;
       border: none;
       border-radius: 5px;
-      background-color: #ffffffaa;
-      color: black;
+      background-color: #00c853;
+      color: white;
       cursor: pointer;
     }
-
-    #searchBtn:hover {
-      background-color: #ffffff;
-    }
-
-    #track-title {
-      text-align: center;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    .track {
-      margin-bottom: 8px;
+    #trackList div {
+      margin-top: 10px;
       cursor: pointer;
-      padding: 5px;
+      padding: 6px;
+      background-color: #222;
       border-radius: 4px;
     }
-
-    .track:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-
     audio {
       width: 100%;
-      margin-top: 10px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ZFavorit Kyy</h1>
+  <h2>🎧 Music By Kyy</h2>
+  <h3># ZFavorit Kyy</h3>
 
-    <div id="searchBox">
-      <input type="text" id="searchInput" placeholder="Cari lagu...">
-      <button id="searchBtn">🔍</button>
-    </div>
-
-    <div id="track-title"></div>
-    <audio id="player" controls autoplay></audio>
-    <div id="trackList"></div>
+  <div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Cari lagu...">
+    <button id="searchBtn">🔍</button>
   </div>
+
+  <div id="track-title">Pilih lagu di bawah</div>
+  <audio id="player" controls autoplay playsinline></audio>
+  <div id="trackList"></div>
 
   <script>
     const playlist = [
       { title: "Gata Only", url: "https://files.catbox.moe/lrbylu.mp4", type: "audio/mp4" },
       { title: "Somebody Pleasure", url: "https://files.catbox.moe/y5s2lo.mpeg", type: "audio/mpeg" },
-{ title: "Love Your Self", url: "https://files.catbox.moe/exyub0.mp4", type: "audio/mp4" },  
+      { title: "Love Your Self", url: "https://files.catbox.moe/exyub0.mp4", type: "audio/mp4" },
       { title: "Last Child", url: "https://files.catbox.moe/c4uj5k.mpeg", type: "audio/mpeg" },
-  { title: "Anti Hero", url: "https://files.catbox.moe/bmmh5v.mpeg", type: "audio/mp4" },
+      { title: "Anti Hero", url: "https://files.catbox.moe/bmmh5v.mpeg", type: "audio/mp4" },
       { title: "Juicy Lutcy", url: "https://files.catbox.moe/vy9x0i.mpeg", type: "audio/mpeg" },
-  { title: "Not Ferfect", url: "https://files.catbox.moe/4b1oho.mpeg", type: "audio/mp4" },
+      { title: "Not Ferfect", url: "https://files.catbox.moe/4b1oho.mpeg", type: "audio/mp4" },
       { title: "Jakarta Hari Ini", url:"https://files.catbox.moe/b6fs9b.mpeg", type: "audio/mpeg" },
-      // Tambah lagu lain di sin
-      // Tambah lagu lain di sini...
     ];
 
     const player = document.getElementById('player');
-    const titleDiv = document.getElementById('track-title');
-    const trackListDiv = document.getElementById('trackList');
-    const searchInput = document.getElementById('searchInput');
+    const trackList = document.getElementById('trackList');
+    const trackTitle = document.getElementById('track-title');
     const searchBtn = document.getElementById('searchBtn');
-    const body = document.body;
+    const searchInput = document.getElementById('searchInput');
 
-    let currentIndex = -1;
+    let currentTrack = 0;
 
-    function loadTrack(index) {
-      if (index < 0 || index >= playlist.length) return;
-      const track = playlist[index];
-      titleDiv.textContent = track.title;
-      player.innerHTML = `<source src="${track.url}" type="${track.type}">`;
-      player.load();
-      player.play();
-      currentIndex = index;
-    }
-
-    function renderAllTracks() {
-      trackListDiv.innerHTML = "";
-      playlist.forEach((track, i) => {
-        const div = document.createElement("div");
-        div.className = "track";
+    function renderTracks(list) {
+      trackList.innerHTML = '';
+      list.forEach((track, index) => {
+        const div = document.createElement('div');
         div.textContent = track.title;
-        div.onclick = () => loadTrack(i);
-        trackListDiv.appendChild(div);
+        div.onclick = () => playTrack(index, list);
+        trackList.appendChild(div);
       });
     }
 
-    function renderSearchResult(keyword) {
-      const filter = keyword.toLowerCase();
-      const matched = playlist.findIndex(track => track.title.toLowerCase().includes(filter));
-
-      if (matched >= 0) {
-        trackListDiv.innerHTML = "";
-        const div = document.createElement("div");
-        div.className = "track";
-        div.textContent = playlist[matched].title;
-        div.onclick = () => loadTrack(matched);
-        trackListDiv.appendChild(div);
-        body.style.backgroundImage = `url('https://files.catbox.moe/pskzp4.jpeg')`;
-        loadTrack(matched);
-      } else {
-        trackListDiv.innerHTML = "<div>Tidak ditemukan.</div>";
-        titleDiv.textContent = "";
-        player.pause();
-        player.removeAttribute("src");
-      }
+    function playTrack(index, list) {
+      currentTrack = index;
+      const track = list[index];
+      player.src = track.url;
+      player.type = track.type;
+      trackTitle.textContent = `🎶 Sedang Memutar: ${track.title}`;
+      player.play();
     }
 
-    searchBtn.addEventListener("click", () => {
-      const keyword = searchInput.value.trim();
-      if (keyword) renderSearchResult(keyword);
-    });
-
-    // Auto next
-    player.addEventListener("ended", () => {
-      if (currentIndex + 1 < playlist.length) {
-        loadTrack(currentIndex + 1);
-      }
-    });
-
-    // On load: background awal + tampilkan semua lagu
-    window.onload = () => {
-      body.style.backgroundImage = `url('https://files.catbox.moe/vy74sv.jpeg')`;
-      renderAllTracks();
+    player.onended = () => {
+      currentTrack = (currentTrack + 1) % playlist.length;
+      playTrack(currentTrack, playlist);
     };
+
+    searchBtn.onclick = () => {
+      const query = searchInput.value.toLowerCase();
+      const filtered = playlist.filter(track => track.title.toLowerCase().includes(query));
+      renderTracks(filtered);
+    };
+
+    window.addEventListener('load', () => {
+      renderTracks(playlist);
+      playTrack(0, playlist);
+    });
   </script>
 </body>
 </html>
+
+
